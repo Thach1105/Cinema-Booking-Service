@@ -70,6 +70,7 @@ public class User implements UserDetails, Serializable {
     private UserStatus status;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ToString.Exclude
     private Set<UserHasRole> roles = new HashSet<>();
 
     @Override
