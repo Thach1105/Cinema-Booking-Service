@@ -1,10 +1,12 @@
 package vn.thachnn.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,7 @@ public class EmailService {
             helper.setFrom(fromEmail);
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(text, true); // true để gửi HTML
+            helper.setText(text, true); // true if send HTML
 
             mailSender.send(message);
             log.info("Email sent successfully");
@@ -70,6 +72,40 @@ public class EmailService {
 
         mailSender.send(message);
         log.info("Verification sent successfully");
+    }
+
+    @KafkaListener(topics = "confirm-account-topic", groupId = "confirm-account-group")
+    private void sendVerificationEmailByKafka(JsonNode messageReceived) throws Exception {
+        String to = messageReceived.get("email").asText();
+        String username = messageReceived.get("username").asText();
+        String fullName = messageReceived.get("fullName").asText();
+
+        String subject = "Verify user";
+
+        // Generate secret code and save to db
+        String secretCode = UUID.randomUUID().toString();
+
+        //Save secretCode to redisHash
+        EmailCode emailCode = EmailCode.builder()
+                .email(to)
+                .id(secretCode)
+                .build();
+        emailCodeRepository.save(emailCode);
+
+        // Generate url verify
+        String verificationLink =
+                "http://localhost:8080/auth/confirm-email?email=%s&secretCode=%s".formatted(to, secretCode);
+        String body = createVerificationEmailContent(username, to, verificationLink, fullName);
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setFrom(fromEmail);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body, true);
+
+        mailSender.send(message);
+        log.info("Verification email Sent Successfully");
     }
 
     //create template e
