@@ -1,11 +1,13 @@
 package vn.thachnn.service.Impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final RoleRepository roleRepository;
     private final UserHasRoleRepository userHasRoleRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public UserDetailsService userDetailsService() {
@@ -86,12 +89,21 @@ public class UserServiceImpl implements UserService {
 
         userHasRoleRepository.save(userHasRole);
 
-       try {
+        //send message to broker
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object jsonNode = objectMapper.createObjectNode()
+                .put("email", newUser.getEmail())
+                .put("username", newUser.getUsername())
+                .put("fullName", newUser.getFullName());
+
+        kafkaTemplate.send("confirm-account-topic", jsonNode);
+
+       /*try {
            emailService.sendVerificationEmail(newUser.getEmail(), newUser.getUsername(), newUser.getFullName());
        } catch (Exception e) {
            log.error("Verification sent failed, errorMessage= {}", e.getMessage());
            throw new RuntimeException(e);
-       }
+       }*/
 
         return userMapper.toUserResponse(newUser);
     }
