@@ -36,6 +36,12 @@ public class Movie {
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
+    @Column(name = "trailer")
+    private String trailer;
+
+    @Column(name = "banner")
+    private String banner;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private MovieStatus status;

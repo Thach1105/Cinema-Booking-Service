@@ -9,6 +9,7 @@ import vn.thachnn.common.CinemaStatus;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -43,6 +44,9 @@ public class Cinema implements Serializable {
 
     @Column(name = "lat", precision = 12, scale = 8, nullable = false)
     private BigDecimal lat;
+
+    @OneToMany(mappedBy = "cinema")
+    private Set<CinemaHall> cinemaHalls;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp

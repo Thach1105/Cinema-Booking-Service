@@ -85,7 +85,8 @@ public class CinemaServiceImpl implements CinemaService {
         Cinema cinema = getById(cinemaId);
         cinema.setStatus(CinemaStatus.INACTIVE);
 
-        cinemaRepository.save(cinema);
+        //cinemaRepository.save(cinema);
+        cinemaRepository.delete(cinema);
     }
 
     public CinemaResponse getCinema(Long cinemaId){

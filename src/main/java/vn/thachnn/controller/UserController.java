@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.thachnn.dto.request.UserCreationRequest;
@@ -51,6 +52,7 @@ public class UserController {
 
     @Operation(summary = "Get user by Id", description = "API retrieve user detail by ID from database")
     @GetMapping("/{userId}")
+   /* @PreAuthorize("hasAuthority('ADMIN')")*/
     public ResponseEntity<?> getUserById(
             @PathVariable @Min(value = 1, message = "userId must be equal or greater than 1") Long userId){
         log.info("Find user with Id: {}", userId);
@@ -66,6 +68,7 @@ public class UserController {
 
     @Operation(summary = "Get user list", description = "API retrieve users from database")
     @GetMapping("/list")
+    /*@PreAuthorize("hasAuthority('SYSADMIN')")*/
     public ResponseEntity<?> getList(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sort,
@@ -89,15 +92,6 @@ public class UserController {
                 .build();
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("/confirm-email")
-    public void confirmEmail(
-            @RequestParam String secretCode,
-            HttpServletResponse response
-    ){
-        log.info("Confirm email for account with Secret Code : {}", secretCode);
-
     }
 
     @Operation(summary = "Update user", description = "API update user to database")

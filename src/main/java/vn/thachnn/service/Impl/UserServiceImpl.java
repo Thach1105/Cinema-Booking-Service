@@ -6,6 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +24,11 @@ import vn.thachnn.dto.response.UserResponse;
 import vn.thachnn.exception.InvalidDataException;
 import vn.thachnn.exception.ResourceNotFoundException;
 import vn.thachnn.mapper.UserMapper;
+import vn.thachnn.model.Role;
 import vn.thachnn.model.User;
+import vn.thachnn.model.UserHasRole;
+import vn.thachnn.repository.RoleRepository;
+import vn.thachnn.repository.UserHasRoleRepository;
 import vn.thachnn.repository.UserRepository;
 import vn.thachnn.service.EmailService;
 import vn.thachnn.service.UserService;
@@ -34,6 +42,26 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final RoleRepository roleRepository;
+    private final UserHasRoleRepository userHasRoleRepository;
+
+    @Override
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.loadUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public User getByUsername(String userName) {
+        return userRepository.findByUsername(userName)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -47,6 +75,16 @@ public class UserServiceImpl implements UserService {
 
        User newUser = userRepository.save(user);
        log.info("Saved user: {}", user);
+
+        Role userRole = roleRepository.findByName("USER")
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+
+        UserHasRole userHasRole = UserHasRole.builder()
+                .user(newUser)
+                .role(userRole)
+                .build();
+
+        userHasRoleRepository.save(userHasRole);
 
        try {
            emailService.sendVerificationEmail(newUser.getEmail(), newUser.getUsername(), newUser.getFullName());
@@ -112,6 +150,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public void delete(Long userId) {
         log.info("Deleting user: {}", userId);
 
@@ -131,6 +170,10 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         } else throw new InvalidDataException("Confirmation password is incorrect");
 
+        if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new InvalidDataException("The new password must be different from the old password");
+        }
+
         userRepository.save(user);
         log.info("Changed password for user: {}", user);
     }
@@ -140,10 +183,4 @@ public class UserServiceImpl implements UserService {
                 () -> new ResourceNotFoundException("User not found")
         );
     }
-
-    /*private User getUser(String username){
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
-        );
-    }*/
 }

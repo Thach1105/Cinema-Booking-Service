@@ -40,10 +40,13 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String generateAccessToken(long userId, String username, Collection<? extends GrantedAuthority> authorities) {
         log.info("Generate access token for user {} with authorities {}", userId, authorities);
-
+        System.out.println(authorities);
         Map<String, Object> claim = new HashMap<>();
         claim.put("userId", userId);
-        claim.put("role", authorities);
+
+        List<String> authoritiesList = new ArrayList<>();
+        authorities.forEach(authority -> authoritiesList.add(authority.getAuthority()));
+        claim.put("role", authoritiesList);
 
         return generateAccessToken(claim, username);
     }
@@ -51,6 +54,7 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String generateRefreshToken(long userId, String username, Collection<? extends GrantedAuthority> authorities) {
         log.info("Generate refresh token for user {} with authorities {}", userId, authorities);
+
 
         Map<String, Object> claim = new HashMap<>();
         claim.put("userId", userId);
@@ -65,24 +69,23 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    public List<String> extractRole(String token, TokenType type){
+        return extractClaim(token, type, claims -> {
+            Object roles = claims.get("role");
+            if (roles instanceof List<?>) {
+                return ((List<?>) roles).stream()
+                        .filter(String.class::isInstance)
+                        .map(String.class::cast)
+                        .toList();
+            }
+            return Collections.emptyList();
+        });
+    }
+
+    @Override
     public boolean isTokenValid(String token, TokenType type, UserDetails userDetails) {
         final String username = extractUsername(token, type);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token, type);
-    }
-
-    public String verifyToken(String token, TokenType type) throws Exception {
-        JwtParser jwtParser = Jwts.parser()
-                .verifyWith(getSingingKey(type))
-                .build();
-
-        try {
-            jwtParser.parse(token);
-
-        } catch (Exception e) {
-            throw new Exception("Could not verify JWT token integrity!", e);
-        }
-
-        return "true";
     }
 
     private Date extractExpiration(String token, TokenType type){
@@ -106,6 +109,7 @@ public class JwtServiceImpl implements JwtService {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+
         } catch (SignatureException | ExpiredJwtException e) {
             log.error("Invalid JWT Token: {}", token);
             throw new AccessDeniedException("Access denied!, error: "+ e.getMessage());

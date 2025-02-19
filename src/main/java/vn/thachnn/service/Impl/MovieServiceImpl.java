@@ -60,7 +60,7 @@ public class MovieServiceImpl implements MovieService {
         log.info("Find all movie start: ");
     }
 
-    private Movie getMovie(Long id){
+    public Movie getMovie(Long id){
         return movieRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Movie not found")
         );

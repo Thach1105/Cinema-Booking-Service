@@ -21,7 +21,6 @@ import vn.thachnn.model.Cinema;
 import vn.thachnn.service.Impl.CinemaServiceImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @Validated
@@ -101,7 +100,7 @@ public class CinemaController {
     public ResponseEntity<?> findAll(
             @RequestParam(required = false) String city,
             @RequestParam(defaultValue = "1") @Min(value = 1, message = "pageNumber must be greater than or equal to 1" ) int pageNumber,
-            @RequestParam(defaultValue = "20") int pageSize
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than or equal to 1" ) int pageSize
     ){
         log.info("Get cinema list");
         Page<Cinema> cinemaPage = cinemaService.getList(city, pageNumber, pageSize);
