@@ -1,5 +1,6 @@
 package vn.thachnn.config;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -89,6 +90,8 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
     @Getter
     @Setter
     private class ErrorResponse {
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
         private Date timestamp;
         private int status;
         private String error;

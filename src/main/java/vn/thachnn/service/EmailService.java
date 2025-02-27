@@ -1,6 +1,7 @@
 package vn.thachnn.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -75,10 +76,14 @@ public class EmailService {
     }
 
     @KafkaListener(topics = "confirm-account-topic", groupId = "confirm-account-group")
-    private void sendVerificationEmailByKafka(JsonNode messageReceived) throws Exception {
-        String to = messageReceived.get("email").asText();
-        String username = messageReceived.get("username").asText();
-        String fullName = messageReceived.get("fullName").asText();
+    private void sendVerificationEmailByKafka(String messageReceived) throws Exception {
+        //log.info("Consumer 0 received message: {}", messageReceived);
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(messageReceived);
+
+        String to = jsonNode.get("email").asText();
+        String username = jsonNode.get("username").asText();
+        String fullName = jsonNode.get("fullName").asText();
 
         String subject = "Verify user";
 

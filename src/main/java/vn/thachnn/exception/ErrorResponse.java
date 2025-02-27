@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class ErrorResponse implements Serializable {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date timestamp;
     private int status;
     private String path;
