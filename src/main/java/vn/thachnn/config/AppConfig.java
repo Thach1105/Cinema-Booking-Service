@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,18 +21,31 @@ import vn.thachnn.service.UserService;
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
+@EnableScheduling
 public class AppConfig {
 
     private final CustomizeRequestFilter preFilter;
     private final PasswordEncoderConfig passwordConfig;
     private final UserService userService;
 
+    private final String[] whitelistUrls = {
+            "/auth/sign-in", "/auth/confirm-email",
+            "/user/register",
+            "/cinema/list",
+            "/showtime/{showtimeId}/**", "/showtimeId/list-for-user",
+            "/movie/public/list", "/movie/{movieId}", "/movie/list-city",
+            "/kafka",
+            "/payment/redirect-from-zalopay", "/payment/zalopay-call-back",
+            "/review/for-movie/{movieId}", "/review//{reviewId}"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests
-                        (request -> request.requestMatchers("/auth/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/user").permitAll()
+                        (request -> request.requestMatchers(whitelistUrls).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/cinema/{cinemaId}").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/movie/{movieId}").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(preFilter, UsernamePasswordAuthenticationFilter.class)
@@ -61,9 +75,4 @@ public class AppConfig {
 
         return provider;
     }
-
-    /*@Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }*/
 }
