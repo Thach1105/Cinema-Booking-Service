@@ -48,11 +48,13 @@ public class SeatServiceImpl implements SeatService {
         return seats.stream().map(seatMapper::toSeatResponse).toList();
     }
 
-    public List<Seat> getSeatsById(List<Long> ids){
+    @Override
+    public List<Seat> getSeatsById(List<Long> ids) {
         return seatRepository.findAllById(ids);
     }
 
-    public Seat getById(Long id){
+    @Override
+    public Seat getById(Long id) {
         return seatRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("Seat not found"));
     }

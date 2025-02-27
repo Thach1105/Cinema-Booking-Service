@@ -45,8 +45,8 @@ public class Showtime implements Serializable {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
-    @Column(name = "price", nullable = false)
-    private Integer price;
+    /*@Column(name = "price", nullable = false)
+    private Integer price;*/
 
     @OneToMany(mappedBy = "showtime",
             fetch = FetchType.LAZY,

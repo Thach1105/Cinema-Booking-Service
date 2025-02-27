@@ -41,8 +41,9 @@ public class ShowtimeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    /*PUBLIC*/
     @GetMapping("/{showtimeId}")
-    @Operation(summary = "Get showtime by id", description = "Api get showtime by id from database")
+    @Operation(summary = "Get showtime details by id", description = "Api get showtime by id from database")
     public ResponseEntity<?> getShowtimeById(
             @PathVariable Long showtimeId
     ){
@@ -58,7 +59,7 @@ public class ShowtimeController {
     }
 
     /*PUBLIC*/
-    @GetMapping("/{showtimeId}/list-of-seats")
+    @GetMapping("/{showtimeId}/detail")
     @Operation(summary = "Get list of seats for showtime",
             description = "This API retrieves the list of seats available for a specific showtime.")
     public ResponseEntity<?> getListSeatForShowtime(
@@ -75,8 +76,8 @@ public class ShowtimeController {
     }
 
     /*PUBLIC*/
-    @GetMapping("/list-for-user")
-    @Operation(summary = "Get list showtime for user", description = "Api get list showtime for user by movie and cinema")
+    @GetMapping("/list")
+    @Operation(summary = "Get list showtime", description = "Api get list showtime for user by movie and cinema")
     public ResponseEntity<?> getShowtimeForUser(
             @RequestParam(name = "cinemaId") Long cinemaId,
             @RequestParam(required = false, name = "movieId") Long movieId,
@@ -87,7 +88,7 @@ public class ShowtimeController {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .status(HttpStatus.OK.value())
                 .message("showtime list")
-                .data(showtimeService.getShowtimeForUser(movieId, cinemaId, selectedDate))
+                .data(showtimeService.getListShowtime(movieId, cinemaId, selectedDate))
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

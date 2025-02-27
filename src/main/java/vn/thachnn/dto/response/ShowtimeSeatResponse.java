@@ -19,4 +19,5 @@ public class ShowtimeSeatResponse implements Serializable {
     private String seatNumber;
     private SeatType seatType;
     private SeatStatus status;
+    private Integer price;
 }

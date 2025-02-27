@@ -1,5 +1,6 @@
 package vn.thachnn.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -38,7 +39,15 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
                 :selectedDate IS NULL
                 OR DATE(s.startTime) = :selectedDate
             )
-            ORDER BY s.startTime ASC
+            ORDER BY s.movie DESC, s.startTime ASC
             """)
-    List<Showtime> getAllShowtimeForUser(Cinema cinema, Movie movie, LocalDate selectedDate);
+    List<Showtime> getListShowtime(Cinema cinema, Movie movie, LocalDate selectedDate);
+
+    @Query("""
+            SELECT COUNT(s)
+            FROM Showtime s
+            WHERE s.movie = :movie
+            AND s.endTime > CURRENT_TIMESTAMP
+            """)
+    int countShowtimeOfMovieFuture(Movie movie);
 }

@@ -1,3 +1,4 @@
+/*
 package vn.thachnn.dto.response;
 
 import lombok.*;
@@ -14,10 +15,11 @@ import java.time.LocalDateTime;
 public class ShowtimeResponse implements Serializable {
 
     private Long id;
-    private Long movieId;
     private String movieName;
-    private Long hallId;
+    private String cinemaName;
+    private String hallName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer price;
 }
+*/
