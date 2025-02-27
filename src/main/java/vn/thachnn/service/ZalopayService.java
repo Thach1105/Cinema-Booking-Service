@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import vn.thachnn.dto.request.ZalopayCallbackRequest;
 import vn.thachnn.model.RedisTicket;
 import vn.thachnn.model.User;
-import vn.thachnn.service.Impl.BookingServiceImpl;
+import vn.thachnn.service.Impl.BookingService;
 import vn.thachnn.service.Impl.RedisTicketService;
 import vn.thachnn.util.zalopay.HMACUtil;
 
@@ -41,7 +41,7 @@ import java.util.*;
 public class ZalopayService {
 
     private final RedisTicketService redisTicketService;
-    private final BookingServiceImpl bookingService;
+    private final BookingService bookingService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${zalopay.app-id}")
