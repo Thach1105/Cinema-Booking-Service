@@ -1,6 +1,7 @@
 package vn.thachnn.dto.response;
 
 import lombok.*;
+import vn.thachnn.common.MovieStatus;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -18,4 +19,7 @@ public class MovieResponse implements Serializable {
     private Integer duration;
     private Integer ageLimit;
     private LocalDate releaseDate;
+    private String banner;
+    private String trailer;
+    private MovieStatus status;
 }

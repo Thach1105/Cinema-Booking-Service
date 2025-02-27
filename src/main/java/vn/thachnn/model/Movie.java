@@ -27,19 +27,19 @@ public class Movie {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "duration")
+    @Column(name = "duration", nullable = false)
     private Integer duration;
 
-    @Column(name = "age_limit")
+    @Column(name = "age_limit", nullable = false)
     private Integer ageLimit;
 
-    @Column(name = "release_date")
+    @Column(name = "release_date", nullable = false)
     private LocalDate releaseDate;
 
     @Column(name = "trailer")
     private String trailer;
 
-    @Column(name = "banner")
+    @Column(name = "banner", unique = true)
     private String banner;
 
     @Enumerated(EnumType.STRING)
