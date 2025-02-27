@@ -40,4 +40,9 @@ public class KafkaProducerConfig {
     public NewTopic confirmAccount() {
         return new NewTopic("confirm-account-topic", 3, (short) 1);
     }
+
+    @Bean
+    public NewTopic paymentRequest(){
+        return new NewTopic("ticket-payment-success", 5, (short) 1);
+    }
 }
