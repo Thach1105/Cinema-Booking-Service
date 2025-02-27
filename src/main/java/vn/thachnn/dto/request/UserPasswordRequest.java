@@ -9,9 +9,6 @@ import java.io.Serializable;
 @Getter
 public class UserPasswordRequest implements Serializable {
 
-    @NotNull(message = "id must be not null")
-    private Long id;
-
     @NotBlank(message = "password must be not blank")
     private String password;
 

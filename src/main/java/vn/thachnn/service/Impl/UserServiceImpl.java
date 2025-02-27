@@ -91,10 +91,11 @@ public class UserServiceImpl implements UserService {
 
         //send message to broker
         ObjectMapper objectMapper = new ObjectMapper();
-        Object jsonNode = objectMapper.createObjectNode()
+        String jsonNode = objectMapper.createObjectNode()
                 .put("email", newUser.getEmail())
                 .put("username", newUser.getUsername())
-                .put("fullName", newUser.getFullName());
+                .put("fullName", newUser.getFullName())
+                .toString();
 
         kafkaTemplate.send("confirm-account-topic", jsonNode);
 
@@ -121,7 +122,7 @@ public class UserServiceImpl implements UserService {
         log.info("Updating user with ID: {}", request.getId());
         User user = getUser(userId);
         user.setFullName(request.getFullName());
-        user.setGender(Gender.valueOf(request.getGender()));
+        user.setGender(request.getGender());
         user.setDateOfBirth(request.getDateOfBirth());
         user.setPhone(request.getPhone());
 
@@ -162,7 +163,6 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public void delete(Long userId) {
         log.info("Deleting user: {}", userId);
 
@@ -174,10 +174,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(UserPasswordRequest request) {
+    public void changePassword(UserPasswordRequest request, User user) {
         log.info("Changing password for user: {}", request);
 
-        User user = getUser(request.getId());
         if(request.getPassword().equals(request.getConfirmPassword())){
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         } else throw new InvalidDataException("Confirmation password is incorrect");

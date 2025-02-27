@@ -2,6 +2,7 @@ package vn.thachnn.dto.response;
 
 import lombok.*;
 import vn.thachnn.common.Gender;
+import vn.thachnn.common.UserStatus;
 import vn.thachnn.common.UserType;
 
 import java.io.Serializable;
@@ -25,4 +26,5 @@ public class UserResponse implements Serializable {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserType type;
+    private UserStatus status;
 }

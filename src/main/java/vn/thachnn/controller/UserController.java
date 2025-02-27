@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.thachnn.dto.request.UserCreationRequest;
@@ -37,7 +38,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @Operation(summary = "Create user", description = "API add new user to database for user")
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<?> createUser(@RequestBody @Valid UserCreationRequest request) {
         log.info("Create new user: {}", request);
 
@@ -52,7 +53,7 @@ public class UserController {
 
     @Operation(summary = "Get user by Id", description = "API retrieve user detail by ID from database")
     @GetMapping("/{userId}")
-   /* @PreAuthorize("hasAuthority('ADMIN')")*/
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getUserById(
             @PathVariable @Min(value = 1, message = "userId must be equal or greater than 1") Long userId){
         log.info("Find user with Id: {}", userId);
@@ -68,7 +69,7 @@ public class UserController {
 
     @Operation(summary = "Get user list", description = "API retrieve users from database")
     @GetMapping("/list")
-    /*@PreAuthorize("hasAuthority('SYSADMIN')")*/
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getList(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sort,
@@ -94,6 +95,21 @@ public class UserController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/my-profile")
+    public ResponseEntity<?> getMyProfile(
+            @AuthenticationPrincipal User user
+    ){
+        log.info("Get user {} profile", user.getId());
+
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .status(HttpStatus.OK.value())
+                .message("my-profile")
+                .data(userMapper.toUserResponse(user))
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @Operation(summary = "Update user", description = "API update user to database")
     @PutMapping("/{userId}")
     public ResponseEntity<?> updateUser(
@@ -112,6 +128,7 @@ public class UserController {
     }
 
     @Operation(summary = "Delete user", description = "API delete user")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(
             @PathVariable @Min(value = 1, message = "userId must be equal or greater than 1") Long userId
@@ -131,10 +148,11 @@ public class UserController {
     @Operation(summary = "Change Password", description = "API change password for user to database")
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(
-            @RequestBody @Valid UserPasswordRequest request
+            @RequestBody @Valid UserPasswordRequest request,
+            @AuthenticationPrincipal User user
     ){
         log.info("Change password user: {}", request);
-        userService.changePassword(request);
+        userService.changePassword(request, user);
 
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .status(HttpStatus.OK.value())

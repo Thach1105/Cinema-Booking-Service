@@ -24,5 +24,5 @@ public interface UserService extends UserDetailsService{
 
     void delete(Long userId);
 
-    void changePassword(UserPasswordRequest request);
+    void changePassword(UserPasswordRequest request, User user);
 }
