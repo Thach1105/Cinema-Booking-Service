@@ -18,6 +18,8 @@ import vn.thachnn.model.Cinema;
 import vn.thachnn.repository.CinemaRepository;
 import vn.thachnn.service.CinemaService;
 
+import java.util.List;
+
 @Service
 @Slf4j(topic = "CINEMA-SERVICE")
 @RequiredArgsConstructor
@@ -89,6 +91,14 @@ public class CinemaServiceImpl implements CinemaService {
         cinemaRepository.delete(cinema);
     }
 
+    @Override
+    public List<String> getListCity() {
+        log.info("Get list of cities");
+
+       return cinemaRepository.getAllCities();
+    }
+
+    @Override
     public CinemaResponse getCinema(Long cinemaId){
         return cinemaMapper.toCinemaResponse(getById(cinemaId));
     }

@@ -5,6 +5,8 @@ import vn.thachnn.dto.request.CinemaRequest;
 import vn.thachnn.dto.response.CinemaResponse;
 import vn.thachnn.model.Cinema;
 
+import java.util.List;
+
 public interface CinemaService {
 
     CinemaResponse create(CinemaRequest request);
@@ -15,5 +17,9 @@ public interface CinemaService {
 
     Page<Cinema> getList(String city, Integer pageNumber, Integer pageSize);
 
+    List<String> getListCity();
+
     void delete(Long cinemaId);
+
+    CinemaResponse getCinema(Long cinemaId);
 }

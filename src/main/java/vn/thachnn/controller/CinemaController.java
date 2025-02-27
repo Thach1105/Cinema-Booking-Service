@@ -95,7 +95,6 @@ public class CinemaController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Get list cinema", description = "API retrieve list cinema by ID from database")
     public ResponseEntity<?> findAll(
             @RequestParam(required = false) String city,
@@ -122,5 +121,19 @@ public class CinemaController {
                 .build();
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/list-city")
+    @Operation(summary = "Get a list cities", description = "API get a list of cities with cinemas.")
+    public ResponseEntity<?> getListCity() {
+        log.info("Get city list");
+
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .status(HttpStatus.OK.value())
+                .message("cities")
+                .data(cinemaService.getListCity())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
     }
 }
