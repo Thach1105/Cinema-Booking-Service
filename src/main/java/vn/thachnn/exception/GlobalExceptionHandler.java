@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -21,19 +22,6 @@ import static org.springframework.http.HttpStatus.*;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(AppException.class)
-    public ResponseEntity<?> handleAppException(AppException e, WebRequest request){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(new Date())
-                .status(e.getErrorApp().getStatus().value())
-                .error(e.getErrorApp().getStatus().getReasonPhrase())
-                .path(request.getDescription(false).replace("uri=",""))
-                .message(e.getErrorApp().getMessage())
-                .build();
-
-        return ResponseEntity.status(e.getErrorApp().getStatus()).body(errorResponse);
-    }
-
     @ExceptionHandler({AccessDeniedException.class, ForbiddenException.class})
     @ResponseStatus(FORBIDDEN)
     public ErrorResponse handleAccessDeniedException(Exception e, WebRequest request){
@@ -42,6 +30,19 @@ public class GlobalExceptionHandler {
                 .timestamp(new Date())
                 .status(FORBIDDEN.value())
                 .error(FORBIDDEN.getReasonPhrase())
+                .path(request.getDescription(false).replace("uri=",""))
+                .message(e.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(UNAUTHORIZED)
+    public ErrorResponse handleAuthenticationException(Exception e, WebRequest request){
+
+        return ErrorResponse.builder()
+                .timestamp(new Date())
+                .status(UNAUTHORIZED.value())
+                .error(UNAUTHORIZED.getReasonPhrase())
                 .path(request.getDescription(false).replace("uri=",""))
                 .message(e.getMessage())
                 .build();
@@ -165,6 +166,19 @@ public class GlobalExceptionHandler {
         } else {
             errorResponse.setError("Database Constraint Violation");
         }
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Exception e, WebRequest request){
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setStatus(INTERNAL_SERVER_ERROR.value());
+        errorResponse.setError("Internal_server_error");
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setMessage(e.getMessage());
 
         return errorResponse;
     }
