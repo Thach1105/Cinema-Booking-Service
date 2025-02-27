@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import vn.thachnn.common.TokenType;
 import vn.thachnn.exception.InvalidDataException;
+import vn.thachnn.repository.BlackListTokenRepository;
 import vn.thachnn.service.JwtService;
 
 import javax.crypto.SecretKey;
@@ -23,7 +25,10 @@ import static vn.thachnn.common.TokenType.REFRESH_TOKEN;
 
 @Service
 @Slf4j(topic = "JWT-SERVICE")
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
+
+    private final BlackListTokenRepository blackListTokenRepository;
 
     @Value("${jwt.expiryMinutes}")
     private long EXPIRY_MINUTES;
@@ -88,8 +93,14 @@ public class JwtServiceImpl implements JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token, type);
     }
 
-    private Date extractExpiration(String token, TokenType type){
+    @Override
+    public Date extractExpiration(String token, TokenType type) {
         return extractClaim(token, type, Claims::getExpiration);
+    }
+
+    @Override
+    public String extractTokenId(String token, TokenType type){
+        return extractClaim(token, type, Claims::getId);
     }
 
     private boolean isTokenExpired(String token, TokenType type){
@@ -98,6 +109,14 @@ public class JwtServiceImpl implements JwtService {
 
     private <T> T extractClaim(String token, TokenType type, Function<Claims, T> claimsResolvers){
         final Claims claims = extractAllClaims(token, type);
+        String tokenId = claims.getId();
+        if(blackListTokenRepository.existsById(tokenId)){
+            log.error("Token with id {} is blacklisted", tokenId);
+            throw new AccessDeniedException(
+                    String.format("Access denied! %s is blacklisted", type.toString())
+            );
+        }
+
         return claimsResolvers.apply(claims);
     }
 
@@ -120,6 +139,7 @@ public class JwtServiceImpl implements JwtService {
         log.info("Generate access token for user {}", username);
 
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date())
@@ -132,6 +152,7 @@ public class JwtServiceImpl implements JwtService {
         log.info("Generate refresh token for user {}", username);
 
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date())

@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import vn.thachnn.common.TokenType;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 public interface JwtService {
@@ -18,4 +19,8 @@ public interface JwtService {
     List<String> extractRole(String token, TokenType type);
 
     boolean isTokenValid(String token, TokenType type, UserDetails userDetails);
+
+    Date extractExpiration(String token, TokenType type);
+
+    String extractTokenId(String token, TokenType type);
 }
