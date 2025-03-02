@@ -7,15 +7,36 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/testdb
-    username: root
-    password: password
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/testdb?serverTimezone=Asia/Ho_Chi_Minh
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: thachlearncode@gmail.com
+    password: rfec kbxr fkvy mely
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  redis:
+    #host: ${REDIS_HOST:localhost}
+    host: ${REDIS_HOST:localhost}
+    port: 6379
+  kafka:
+    #bootstrap-servers: kafka:9092
+    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:29092}
+    consumer:
+      enable-auto-commit: false
 
 # application-dev.yml
 springdoc:
@@ -30,5 +51,24 @@ openapi:
     title: Cinema Booking Service
     version: 1.0.0
 
+# jwt
 jwt:
-  secretKey: abc@123
+  expiryDay: 3
+  expiryMinutes: 60
+  accessKey: ${JWT_AC:fPEZIjt0xHDMP/TlLjuXBuXCyN9HuB498CEQXZ39oiQ=}
+  refreshKey: ${JWT_RF:TN13ztj3wnw/DC9qiDz+pU/DaxztO6ZF1x33kqbvdhM=}
+
+#cloudinary
+cloudinary:
+  cloud-name: ${CLOUDINARY_NAME:djtohfqmr}
+  api-key: ${CLOUDINARY_KEY:153747759143969}
+  api-secret: ${CLOUDINARY_SECRET:yNwJ5U70IQ9uGc1UM-rjXp869tk}
+
+#zalopay
+zalopay:
+  app-id: ${ZALOPAY_ID:2554}
+  key1: ${ZALOPAY_KEY1:sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn}
+  key2: ${ZALOPAY_KEY2:trMrHtvjo6myautxDUiAcYsVtaeQ8nhf}
+  endpoint: https://sb-openapi.zalopay.vn/v2
+  redirectURL: http://localhost:8080/payment/redirect-from-zalopay
+  callbackURL: http://localhost:8080/payment/zalopay-call-back
