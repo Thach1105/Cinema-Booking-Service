@@ -1,6 +1,7 @@
 package vn.thachnn.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -149,17 +150,31 @@ public class MovieController {
     }
 
     @GetMapping("/list")
-    @Operation(summary = "", description = "")
+    @Operation(
+            summary = "Get a list of movies",
+            description = "Retrieves a paginated list of movies with optional filters for title," +
+                    " release date, duration, age limit, and status. Sorting and pagination are also supported."
+    )
     public ResponseEntity<?> getAll (
         @RequestParam(name = "title", required = false) String title,
+
+        @Parameter(description = "Filter movies by release date (YYYY-MM-DD)", example = "2024-05-10")
         @RequestParam(name = "releaseDate", required = false) LocalDate releaseDate,
+
         @RequestParam(name = "minDuration", required = false) Integer minDuration,
         @RequestParam(name = "maxDuration", required = false) Integer maxDuration,
         @RequestParam(name = "ageLimitCondition", required = false) String ageLimitCondition,
         @RequestParam(name = "status", required = false) MovieStatus status,
+
+        @Parameter(description = "Sort movies by a specific field (e.g., 'title', 'releaseDate')",
+                example = "releaseDate")
         @RequestParam(name = "sortBy", required = false) String sortBy,
+
+        @Parameter(description = "Sorting direction (ASC for ascending, DESC for descending)",
+                example = "DESC")
         @RequestParam(name = "direction", required = false) String direction,
         @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+
         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ){
         log.info("Find all movie");

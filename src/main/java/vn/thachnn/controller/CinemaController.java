@@ -1,6 +1,9 @@
 package vn.thachnn.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.thachnn.dto.request.CinemaRequest;
 import vn.thachnn.dto.response.ApiResponse;
 import vn.thachnn.dto.response.CinemaResponse;
+import vn.thachnn.dto.response.MovieResponse;
 import vn.thachnn.dto.response.PaginationResponse;
 import vn.thachnn.mapper.CinemaMapper;
 import vn.thachnn.model.Cinema;
@@ -36,11 +40,16 @@ public class CinemaController {
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Create new cinema", description = "API add new cinema to database")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Thành công",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CinemaResponse.class))),
+    })
     public ResponseEntity<?> create(@RequestBody @Valid CinemaRequest request){
         log.info("Create new cinema: {}", request);
 
         ApiResponse<?> apiResponse = ApiResponse.builder()
-                .status(HttpStatus.OK.value())
+                .status(HttpStatus.CREATED.value())
                 .message("Created cinema successfully")
                 .data(cinemaService.create(request))
                 .build();
@@ -55,7 +64,7 @@ public class CinemaController {
         log.info("Update cinema with id: {}", cinemaId);
 
         ApiResponse<?> apiResponse = ApiResponse.builder()
-                .status(HttpStatus.OK.value())
+                .status(HttpStatus.ACCEPTED.value())
                 .message("Updated cinema successfully")
                 .data(cinemaService.update(cinemaId, request))
                 .build();

@@ -1,4 +1,21 @@
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-cinema
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=testdb
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    networks:
+      - default
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
@@ -6,17 +23,18 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - '22181:2181'
+      - "22181:2181"
     networks:
       - default
 
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
+    restart: always
     depends_on:
       - zookeeper
     ports:
-      - '29092:29092'
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -27,20 +45,16 @@ services:
     networks:
       - default
 
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    cap_add:
-      - SYS_NICE
+  redis:
+    image: redis:latest
+    container_name: redis-cinema
+    hostname: redis-cinema
     restart: always
-    environment:
-      - MYSQL_DATABASE=testdb
-      - MYSQL_ROOT_PASSWORD=password
     ports:
-      - '3306:3306'
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+      - "6379:6379"
+    environment:
+    - ALLOW_EMPTY_PASSWORD=yes
+    - REDIS_DISABLE_COMMANDS=FLUSHDB;FLUSHALL
     networks:
       - default
 
@@ -50,18 +64,26 @@ services:
       context: ./
       dockerfile: Dockerfile
     environment:
-      - MYSQL_HOST=mysql-cinema-booking
+      - SPRING_PROFILES_ACTIVE=dev
+      - MYSQL_HOST=mysql-cinema
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - REDIS_HOST=redis-cinema
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
     ports:
       - "8080:8080"
     depends_on:
       - mysql
+      - redis
       - kafka
     networks:
       - default
 
 networks:
   default:
-    name: backend-service
+    name: backend-network
+    driver: bridge
 
 volumes:
   mysql_data:

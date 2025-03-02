@@ -20,6 +20,7 @@ import vn.thachnn.util.DateTimeUtils;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +67,11 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .build();
+
+        LocalDateTime releaseDate = movie.getReleaseDate().atStartOfDay();
+        if(request.getStartTime().isBefore(releaseDate)){
+            showtime.setType(ShowtimeType.EARLY);
+        }
 
         showtime = showtimeRepository.save(showtime);
 
@@ -117,7 +123,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
             //get price of seat in TicketPrice
             Integer price = ticketPriceService.getPriceByAttributes(
-                    ShowtimeType.REGULAR,
+                    showtime.getType(),
                     showtime.getHall().getType(),
                     ss.getSeat().getType(),
                     DateTimeUtils.checkDayType(showtime.getStartTime()));

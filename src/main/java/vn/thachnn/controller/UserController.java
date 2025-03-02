@@ -96,6 +96,10 @@ public class UserController {
     }
 
     @GetMapping("/my-profile")
+    @Operation(
+            summary = "Get current user profile",
+            description = "Retrieves the profile details of the currently authenticated user."
+    )
     public ResponseEntity<?> getMyProfile(
             @AuthenticationPrincipal User user
     ){

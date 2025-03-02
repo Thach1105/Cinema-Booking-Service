@@ -2,6 +2,7 @@ package vn.thachnn.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import vn.thachnn.common.ShowtimeType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -22,7 +23,7 @@ public class ShowtimeDetailResponse implements Serializable {
     private Integer ageLimit;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    /*private Integer price;*/
+    private ShowtimeType type;
     private List<ShowtimeSeatResponse> seats;
     private Integer availableSeats;
 }

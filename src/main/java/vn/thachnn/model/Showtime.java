@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import vn.thachnn.common.ShowtimeType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -44,6 +45,10 @@ public class Showtime implements Serializable {
 
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private ShowtimeType type;
 
     /*@Column(name = "price", nullable = false)
     private Integer price;*/

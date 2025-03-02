@@ -32,6 +32,7 @@ public class ShowtimeRequest implements Serializable {
     private LocalDateTime startTime;
 
     @Schema(description = "The end time of the showtime", example = "2025-03-15T21:00:00")
+    @Future(message = "The showtime start time must be in the future")
     @NotNull(message = "endTime must be not null")
     private LocalDateTime endTime;
 

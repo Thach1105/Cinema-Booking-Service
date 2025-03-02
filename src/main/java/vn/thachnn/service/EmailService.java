@@ -77,30 +77,38 @@ public class EmailService {
 
     @KafkaListener(topics = "confirm-account-topic", groupId = "confirm-account-group")
     private void sendVerificationEmailByKafka(String messageReceived) throws Exception {
-        //log.info("Consumer 0 received message: {}", messageReceived);
+        log.info("Received message from Kafka: {}", messageReceived);
+
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(messageReceived);
+
+        // Check for missing fields
+        if (jsonNode.get("email") == null || jsonNode.get("username") == null || jsonNode.get("fullName") == null) {
+            log.error("Invalid message received: missing required fields");
+            return;
+        }
 
         String to = jsonNode.get("email").asText();
         String username = jsonNode.get("username").asText();
         String fullName = jsonNode.get("fullName").asText();
-
         String subject = "Verify user";
 
         // Generate secret code and save to db
         String secretCode = UUID.randomUUID().toString();
 
-        //Save secretCode to redisHash
+        // Save secretCode to redisHash
         EmailCode emailCode = EmailCode.builder()
                 .email(to)
                 .id(secretCode)
                 .build();
         emailCodeRepository.save(emailCode);
 
-        // Generate url verify
+        // Generate URL verification link
         String verificationLink =
                 "http://localhost:8080/auth/confirm-email?email=%s&secretCode=%s".formatted(to, secretCode);
+
         String body = createVerificationEmailContent(username, to, verificationLink, fullName);
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -109,8 +117,12 @@ public class EmailService {
         helper.setSubject(subject);
         helper.setText(body, true);
 
-        mailSender.send(message);
-        log.info("Verification email Sent Successfully");
+        try {
+            mailSender.send(message);
+            log.info("Verification email Sent Successfully");
+        } catch (Exception e) {
+            log.error("Failed to send verification email", e);
+        }
     }
 
     //create template e

@@ -30,7 +30,7 @@ public class RedisTicketService {
 
     public RedisTicket get(String id){
         return redisTicketRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Session Id not found or expired"));
     }
 
     public RedisTicket update(RedisTicket redisTicket){

@@ -3,12 +3,14 @@ package vn.thachnn.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import vn.thachnn.common.PaymentMethod;
@@ -32,7 +34,12 @@ public class PaymentController {
 
     private final ZalopayService zalopayService;
 
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/{transactionCode}")
+    @Operation(
+            summary = "Create a payment link",
+            description = "Generates a payment link based on the specified transaction code and payment method."
+    )
     public ResponseEntity<?> createPaymentLink(
             @PathVariable String transactionCode,
             @RequestParam PaymentMethod paymentType,
@@ -53,6 +60,10 @@ public class PaymentController {
     }
 
     @PostMapping("/zalopay-call-back")
+    @Operation(
+            summary = "Handle ZaloPay callback",
+            description = "Processes the callback from ZaloPay when a payment status update."
+    )
     public ResponseEntity<?> zalopayCallback(
             @RequestBody ZalopayCallbackRequest request
     ) throws JsonProcessingException {
@@ -65,6 +76,10 @@ public class PaymentController {
     }
 
     @GetMapping("/redirect-from-zalopay")
+    @Operation(
+            summary = "Validate ZaloPay checksum",
+            description = "Verifies the checksum received from ZaloPay to ensure the payment details are valid."
+    )
     public ResponseEntity<?> checksumZalopay(
         @RequestParam String amount,
         @RequestParam String appid,

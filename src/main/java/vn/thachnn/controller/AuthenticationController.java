@@ -56,7 +56,7 @@ public class AuthenticationController {
     }
 
     @Operation(summary = "Confirm Email", description = "Confirm email for account")
-    @PostMapping("/confirm-email")
+    @GetMapping("/confirm-email")
     public ResponseEntity<?> confirmEmail(
             @RequestParam @Email String email,
             @RequestParam String secretCode
@@ -73,6 +73,11 @@ public class AuthenticationController {
     }
 
     @PostMapping("/sign-out")
+    @Operation(
+            summary = "Sign out user",
+            description = "This API allows users to log out by providing an Access Token and Refresh Token. " +
+                    "The access token should be sent in the Authorization header, prefixed with 'Bearer '."
+    )
     public ResponseEntity<?> signOut(
             @RequestHeader("Authorization") String authHeader,
             @RequestParam String refreshToken,
